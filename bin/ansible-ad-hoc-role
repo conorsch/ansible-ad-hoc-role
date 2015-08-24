@@ -1,0 +1,28 @@
+#!/bin/bash
+# Quick script to allow one-off applications of Ansible roles
+# against target hosts.
+# set role path in ansible.cfg or ANSIBLE_ROLES_PATH environment variable
+set -e
+
+
+role=$1
+hosts=$2
+
+if [[ $# -lt 2 ]] ; then
+    echo "Usage: $(basename "$0") <role> <hosts>"
+    exit 1
+fi
+
+shift 2
+
+echo "Applying '${role}' to ${hosts}..."
+
+tmpfile=$(mktemp)
+cat > $tmpfile <<PLAYBOOK
+---
+- hosts: $hosts
+  roles:
+  - $role
+PLAYBOOK
+
+ansible-playbook "${tmpfile}" "$@"
